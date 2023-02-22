@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+    <include file="src/main/resources/db.migration/v-1-0-0/sql/08-02-2023--1--create-table-developers.sql"/>
+    <include file="src/main/resources/db.migration/v-1-0-0/sql/08-02.2023--1--create-table-specialty.sql"/>
+    <include file="src/main/resources/db.migration/v-1-0-0/sql/08-02-2023--create-table-skills.sql"/>
+</databaseChangeLog>
