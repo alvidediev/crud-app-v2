@@ -37,7 +37,7 @@ public class SpecialtyServiceImpl implements SpecialtyService {
     }
 
     @Override
-    public void deleteById(Integer id) {
-        specialtyRepository.deleteById(id);
+    public Specialty deleteById(Integer id) {
+        return specialtyRepository.deleteById(id);
     }
 }

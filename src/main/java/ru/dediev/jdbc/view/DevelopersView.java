@@ -15,6 +15,7 @@ public class DevelopersView {
 
     public void startWorkWithDevelopers() {
         scanner = new Scanner(System.in);
+        boolean stopper = true;
 
         System.out.println("Добро пожаловать в меню специальностей!\n" +
                 "1) Добавить разработчика\n" +
@@ -25,22 +26,27 @@ public class DevelopersView {
                 "6) Вернуться в главное меню");
 
         final int choice = scanner.nextInt();
-        while (true) {
+        while (stopper) {
             switch (choice) {
                 case 1:
                     addDeveloper();
+                    stopper = false;
                     break;
                 case 2:
                     showAllDevs();
+                    stopper = false;
                     break;
                 case 3:
                     getById();
+                    stopper = false;
                     break;
                 case 4:
                     updateDeveloper();
+                    stopper = false;
                     break;
                 case 5:
                     deleteDeveloper();
+                    stopper = false;
                     break;
                 default:
                     MainView mainView = new MainView();
@@ -70,7 +76,7 @@ public class DevelopersView {
         System.out.println("Пожалуйста введите ID для поиска:\n");
         final int idOfDeveloper = scanner.nextInt();
         final Developer developerById = devsController.getById(idOfDeveloper);
-        System.out.println("По ID" + idOfDeveloper + "найден разработчик: " + developerById);
+        System.out.println("По ID " + idOfDeveloper + " найден разработчик: " + developerById);
     }
 
     private void showAllDevs() {
@@ -98,8 +104,7 @@ public class DevelopersView {
 
         System.out.println("Пожалуйста введите ID разработчика, которого хотите удалить");
         int idOfDeveloper = scanner.nextInt();
-        devsController.delete(idOfDeveloper);
-        System.out.println(devsController.read(idOfDeveloper));
+        System.out.println(devsController.delete(idOfDeveloper));
         startWorkWithDevelopers();
     }
 }

@@ -1,7 +1,6 @@
 package ru.dediev.jdbc.service.impl;
 
 import ru.dediev.jdbc.model.Skill;
-import ru.dediev.jdbc.repository.SkillRepository;
 import ru.dediev.jdbc.repository.impl.SkillRepositoryImpl;
 import ru.dediev.jdbc.service.SkillService;
 
@@ -17,7 +16,7 @@ public class SkillServiceImpl implements SkillService {
     }
 
     @Override
-    public int getId(){
+    public int getId() {
         return skillRepository.getId();
     }
 
@@ -37,11 +36,7 @@ public class SkillServiceImpl implements SkillService {
     }
 
     @Override
-    public void deleteById(Integer id) {
-        skillRepository.deleteById(id);
+    public Skill deleteById(Integer id) {
+        return skillRepository.deleteById(id);
     }
-
-//    public void selectSkill(int id, int i){
-//        skillRepository.selectSkill(id, i);
-//    }
 }

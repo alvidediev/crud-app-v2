@@ -3,7 +3,6 @@ package ru.dediev.jdbc.repository.impl;
 
 import ru.dediev.jdbc.config.DatabaseConnection;
 import ru.dediev.jdbc.model.Specialty;
-import ru.dediev.jdbc.model.Status;
 import ru.dediev.jdbc.repository.SpecialtyRepository;
 
 import java.sql.Connection;
@@ -13,49 +12,61 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static ru.dediev.jdbc.model.Status.ACTIVE;
+import static ru.dediev.jdbc.model.Status.DELETED;
+
 public class SpecialtyRepositoryImpl implements SpecialtyRepository {
 
     Connection connection = DatabaseConnection.getInstance().getConnection();
-    private Specialty specialty = null;
+
+    private Specialty devSpecialty;
+
 
     @Override
     public Specialty save(Specialty specialty) {
         try (PreparedStatement pStatement = connection.prepareStatement(
-                "INSERT INTO specialty (specialty_name, specialty_developer_id) VALUES (?, ?)"
+                "INSERT INTO specialty (specialty_name, specialty_developer_id, is_Active) VALUES (?, ?, true)"
         )) {
             pStatement.setString(1, specialty.getName());
             pStatement.setInt(2, specialty.getDeveloperId());
             pStatement.executeUpdate();
-            specialty.setId(getId());
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        specialty.setStatus(Status.ACTIVE);
-        return specialty;
+        devSpecialty = getById(getId());
+        devSpecialty.setStatus(ACTIVE);
+        return devSpecialty;
     }
 
     @Override
     public Specialty getById(Integer integer) {
-
         try (PreparedStatement pStatement = connection.prepareStatement(
                 "SELECT * FROM specialty WHERE id_specialty = ?"
         )) {
             pStatement.setInt(1, integer);
             final ResultSet resultSet = pStatement.executeQuery();
             while (resultSet.next()) {
-                specialty = new Specialty();
-                specialty.setId(resultSet.getInt("id_specialty"));
-                specialty.setName(resultSet.getString("specialty_name"));
-                specialty.setDeveloperId(resultSet.getInt("specialty_developer_id"));
+                devSpecialty = new Specialty();
+                devSpecialty.setId(resultSet.getInt("id_specialty"));
+                if(devSpecialty.getId() == null){
+                    devSpecialty.setStatus(DELETED);
+                }
+                devSpecialty.setName(resultSet.getString("specialty_name"));
+                devSpecialty.setDeveloperId(resultSet.getInt("specialty_developer_id"));
+                if (resultSet.getBoolean("is_Active")) {
+                    devSpecialty.setStatus(ACTIVE);
+                } else {
+                    devSpecialty.setStatus(DELETED);
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return specialty;
+        return devSpecialty;
     }
 
     @Override
-    public int getId() {
+    public Integer getId() {
         int specialtyId;
         try (PreparedStatement pStatement = connection.prepareStatement(
                 "SELECT id_specialty FROM specialty ORDER BY id_specialty DESC LIMIT 1"
@@ -65,8 +76,8 @@ public class SpecialtyRepositoryImpl implements SpecialtyRepository {
                 specialtyId = resultSet.getInt("id_specialty");
                 return specialtyId;
             }
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
         return 0;
     }
@@ -81,36 +92,21 @@ public class SpecialtyRepositoryImpl implements SpecialtyRepository {
         )) {
             final ResultSet resultSet = pStatement.executeQuery();
             while (resultSet.next()) {
-                specialty = new Specialty();
-                specialty.setId(resultSet.getInt("id_specialty"));
-                specialty.setName(resultSet.getString("specialty_name"));
-                specialty.setDeveloperId(resultSet.getInt("specialty_developer_id"));
-                specialties.add(specialty);
+                devSpecialty = new Specialty();
+                devSpecialty.setId(resultSet.getInt("id_specialty"));
+                devSpecialty.setName(resultSet.getString("specialty_name"));
+                devSpecialty.setDeveloperId(resultSet.getInt("specialty_developer_id"));
+                if (resultSet.getBoolean("is_Active")) {
+                    devSpecialty.setStatus(ACTIVE);
+                } else {
+                    devSpecialty.setStatus(DELETED);
+                }
+                specialties.add(devSpecialty);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return specialties;
-    }
-
-    @Override
-    public Specialty getDeveloperSpecialty(int id) {
-
-        try (PreparedStatement pStatement = connection.prepareStatement(
-                "SELECT * FROM specialty WHERE specialty_developer_id = ?"
-        )) {
-            pStatement.setInt(1, id);
-            final ResultSet resultSet = pStatement.executeQuery();
-            while (resultSet.next()) {
-                specialty = new Specialty();
-                specialty.setId(resultSet.getInt("id_specialty"));
-                specialty.setName(resultSet.getString("specialty_name"));
-                specialty.setDeveloperId(resultSet.getInt("specialty_developer_id"));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return specialty;
     }
 
     @Override
@@ -127,16 +123,18 @@ public class SpecialtyRepositoryImpl implements SpecialtyRepository {
     }
 
     @Override
-    public void deleteById(Integer integer) {
+    public Specialty deleteById(Integer integer) {
+        devSpecialty = new Specialty();
         try (PreparedStatement pStatement = connection.prepareStatement(
                 "DELETE FROM specialty WHERE id_specialty = ?"
         )) {
             pStatement.setInt(1, integer);
             pStatement.executeUpdate();
-
         } catch (SQLException e) {
             e.printStackTrace();
+        }finally {
+            devSpecialty.setStatus(DELETED);
         }
-        specialty.setStatus(Status.DELETED);
+        return devSpecialty;
     }
 }

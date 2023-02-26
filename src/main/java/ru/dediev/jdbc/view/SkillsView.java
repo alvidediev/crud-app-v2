@@ -14,6 +14,7 @@ public class SkillsView {
 
     public void startWorkWithSkills() {
         scanner = new Scanner(System.in);
+        boolean stopper = true;
 
         System.out.println("Добро пожаловать в меню специальностей!\n" +
                 "1) Просмотр всех навыков в базе\n" +
@@ -23,19 +24,23 @@ public class SkillsView {
                 "5) Вернуться в главное меню");
 
         final int choice = scanner.nextInt();
-        while (true) {
+        while (stopper) {
             switch (choice) {
                 case 1:
                     showAllSkills();
+                    stopper = false;
                     break;
                 case 2:
                     getSkillById();
+                    stopper = false;
                     break;
                 case 3:
                     updateSkill();
+                    stopper = false;
                     break;
                 case 4:
                     deleteSkill();
+                    stopper = false;
                     break;
                 default:
                     MainView mainView = new MainView();
@@ -82,6 +87,7 @@ public class SkillsView {
         final int skillId = scanner.nextInt();
         final Skill skillById = skillsController.getById(skillId);
         System.out.println("Найден скилл: " + skillById);
+        startWorkWithSkills();
     }
 
     private void showAllSkills() {

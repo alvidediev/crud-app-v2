@@ -9,7 +9,7 @@ import java.util.List;
 
 public class DevelopersController {
 
-    DeveloperService developerService = new DeveloperServiceImpl();
+    private final DeveloperService developerService = new DeveloperServiceImpl();
 
     public Developer create(String firstName, String lastName) {
         Developer developer = new Developer();
@@ -43,7 +43,7 @@ public class DevelopersController {
         return developerService.update(developer);
     }
 
-    public void delete(Integer id) {
-        developerService.deleteById(id);
+    public Developer delete(Integer id) {
+        return developerService.deleteById(id);
     }
 }

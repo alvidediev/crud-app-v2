@@ -13,50 +13,61 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static ru.dediev.jdbc.model.Status.*;
+
 public class SkillRepositoryImpl implements SkillRepository {
 
     Connection connection = DatabaseConnection.getInstance().getConnection();
-    private Skill skill;
+    private Skill devSkill;
     private List<Skill> listOfSkills;
 
     @Override
     public Skill save(Skill skill) {
         try (PreparedStatement pStatement = connection.prepareStatement(
-                "INSERT INTO skill (skill_name, skill_developer_id) VALUES (?, ?) "
+                "INSERT INTO skill (skill_name, skill_developer_id, is_Active) VALUES (?, ?, true)"
         )) {
             pStatement.setString(1, skill.getName());
             pStatement.setInt(2, skill.getDeveloperId());
             pStatement.executeUpdate();
-            skill.setId(getId());
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        skill.setStatus(Status.ACTIVE);
-        return skill;
+        devSkill = getById(getId());
+        devSkill.setStatus(ACTIVE);
+        return devSkill;
     }
 
     @Override
-    public Skill getById(Integer integer) {
-        skill = new Skill();
+    public Skill getById(Integer id) {
+        devSkill = new Skill();
 
         try (PreparedStatement pStatement = connection.prepareStatement(
                 "SELECT * FROM skill WHERE id_skill = ?"
         )) {
-            pStatement.setInt(1, integer);
+            pStatement.setInt(1, id);
             ResultSet resultSet = pStatement.executeQuery();
             while (resultSet.next()) {
-                skill.setId(resultSet.getInt("id_skill"));
-                skill.setName(resultSet.getString("skill_name"));
-                skill.setDeveloperId((resultSet.getInt("skill_developer_id")));
+                devSkill.setId(resultSet.getInt("id_skill"));
+                if (devSkill.getId() == null) {
+                    System.out.println("Похоже, что скилл, который вы ищете по " + id + " еще не создан" +
+                            "либо удален.\nНиже информация по Вашему запросу");
+                    devSkill.setStatus(DELETED);
+                }
+                devSkill.setName(resultSet.getString("skill_name"));
+                devSkill.setDeveloperId((resultSet.getInt("skill_developer_id")));
+                if (resultSet.getBoolean("is_Active")) {
+                    devSkill.setStatus(ACTIVE);
+                }
             }
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return skill;
+        return devSkill;
     }
 
     @Override
-    public int getId() {
+    public Integer getId() {
         int skillId;
         try (PreparedStatement pStatement = connection.prepareStatement(
                 "SELECT id_skill FROM skill ORDER BY id_skill DESC LIMIT 1"
@@ -81,11 +92,19 @@ public class SkillRepositoryImpl implements SkillRepository {
         )) {
             final ResultSet resultSet = pStatement.executeQuery();
             while (resultSet.next()) {
-                skill = new Skill();
-                skill.setId(resultSet.getInt("id_skill"));
-                skill.setName(resultSet.getString("skill_name"));
-                skill.setDeveloperId((resultSet.getInt("skill_developer_id")));
-                listOfSkills.add(skill);
+                devSkill = new Skill();
+                devSkill.setId(resultSet.getInt("id_skill"));
+                if (devSkill.getId() == null) {
+                    System.out.println("Похоже, что в базу еще не добавлены данные о скиллах");
+                }
+                devSkill.setName(resultSet.getString("skill_name"));
+                devSkill.setDeveloperId((resultSet.getInt("skill_developer_id")));
+                if (resultSet.getBoolean("is_Active")) {
+                    devSkill.setStatus(ACTIVE);
+                } else {
+                    devSkill.setStatus(DELETED);
+                }
+                listOfSkills.add(devSkill);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -103,11 +122,16 @@ public class SkillRepositoryImpl implements SkillRepository {
             pStatement.setInt(1, developerId);
             final ResultSet resultSet = pStatement.executeQuery();
             while (resultSet.next()) {
-                skill = new Skill();
-                skill.setId(resultSet.getInt("id_skill"));
-                skill.setName(resultSet.getString("skill_name"));
-                skill.setDeveloperId((resultSet.getInt("skill_developer_id")));
-                listOfSkills.add(skill);
+                devSkill = new Skill();
+                devSkill.setId(resultSet.getInt("id_skill"));
+                devSkill.setName(resultSet.getString("skill_name"));
+                devSkill.setDeveloperId((resultSet.getInt("skill_developer_id")));
+                if (resultSet.getBoolean("is_Active")) {
+                    devSkill.setStatus(ACTIVE);
+                } else {
+                    devSkill.setStatus(DELETED);
+                }
+                listOfSkills.add(devSkill);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -131,16 +155,18 @@ public class SkillRepositoryImpl implements SkillRepository {
     }
 
     @Override
-    public void deleteById(Integer integer) {
+    public Skill deleteById(Integer integer) {
+        devSkill = new Skill();
         try (PreparedStatement pStatement = connection.prepareStatement(
                 "DELETE FROM skill WHERE id_skill = ?"
         )) {
             pStatement.setInt(1, integer);
             pStatement.executeUpdate();
-
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            devSkill.setStatus(DELETED);
         }
-        skill.setStatus(Status.DELETED);
+        return devSkill;
     }
 }

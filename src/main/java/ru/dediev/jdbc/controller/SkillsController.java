@@ -7,7 +7,7 @@ import java.util.List;
 
 public class SkillsController {
 
-    SkillServiceImpl skillService = new SkillServiceImpl();
+    private final SkillServiceImpl skillService = new SkillServiceImpl();
 
     public Skill create(Skill skill){
         return skillService.save(skill);
@@ -36,7 +36,7 @@ public class SkillsController {
         skillService.update(skill);
     }
 
-    public void delete(Integer id){
-        skillService.deleteById(id);
+    public Skill delete(Integer id){
+        return skillService.deleteById(id);
     }
 }

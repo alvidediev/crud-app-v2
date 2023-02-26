@@ -19,7 +19,6 @@ public class DeveloperServiceImpl implements DeveloperService {
     @Override
     public Developer getById(Integer id) {
         return developersRepository.getById(id);
-
     }
 
     @Override
@@ -33,12 +32,12 @@ public class DeveloperServiceImpl implements DeveloperService {
     }
 
     @Override
-    public void deleteById(Integer id) {
-        developersRepository.deleteById(id);
+    public Developer deleteById(Integer id) {
+        return developersRepository.deleteById(id);
     }
 
     @Override
-    public int getId(){
+    public int getId() {
         return developersRepository.getId();
     }
 }
